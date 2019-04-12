@@ -65,7 +65,7 @@ class Configuration:
             print(' '.join(command), file=sys.stderr)
             subprocess.call(command)
         elif run_cc and build_python:
-            from distutils.core import setup, Extension
+            from setuptools import setup, Extension
             tagger = Extension(
                     self.name,
                     sources = [filename],
@@ -74,6 +74,8 @@ class Configuration:
                     extra_link_args = [])
             setup(name = self.name, ext_modules = [tagger],
                   script_args = ['build_ext', '--inplace'])
+            setup(name = self.name, ext_modules = [tagger],
+                  script_args = ['sdist','bdist_wheel'])
 
     def c_emit(self, f, build_python):
         def c_include(filename):
