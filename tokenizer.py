@@ -5,6 +5,7 @@ Treebank, later modified by Robert Östling to use Python 3.
 """
 
 import re
+from itertools import islice, tee
 
 __authors__ = """
 Filip Salomonsson <filip.salomonsson@gmail.com>
@@ -97,32 +98,23 @@ def build_sentences(data, segment=True, non_capitalized=False):
 
 class PeekableIterator:
     def __init__(self, iterable):
-        self._iterable = iter(iterable)
-        self._cache = []
+        self._iterable, self._piterable = tee(iterable)
 
     def __iter__(self):
         return self
 
-    def _fill_cache(self, n):
-        if n is None:
-            n = 1
-        while len(self._cache) < n:
-            self._cache.append(next(self._iterable))
-
     def __next__(self, n=None):
-        self._fill_cache(n)
         if n is None:
-            value = self._cache.pop(0)
+            value = next(self._iterable)
         else:
-            value = [self._cache.pop(0) for i in range(n)]
+            value = islice(self._iterable, n)
         return value
 
     def peek(self, n=None):
-        self._fill_cache(n)
         if n is None:
-            value = self._cache[0]
+            value = next(self._piterable)
         else:
-            value = [self._cache[i] for i in range(n)]
+            value = islice(self._piterable, n)
         return value
 
 smiley_re = re.compile(r"(?:[:;]'?-?[()DS/])|(?:\^_\^)$")
